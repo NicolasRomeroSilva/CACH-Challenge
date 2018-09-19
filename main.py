@@ -4,6 +4,7 @@ import random
 
 parser = WiktionaryParser()
 app = Flask(__name__)
+print(__name__)
 
 website_name = 'http://whateverwecallourwebsite.com'
 
