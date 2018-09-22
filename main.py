@@ -39,9 +39,10 @@ def query(query):
 
 @app.route('/api/getQuestion')
 def get_question():
-    count = int(request.args.get('count'))
+    count = request.args.get('count')
     if count is None:
         count = 1
+    count = int(count)
 
     fin = open("words.txt", "r")
     all_words = fin.readlines()
