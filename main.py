@@ -47,7 +47,7 @@ def get_question():
     fin = open("words.txt", "r")
     all_words = fin.readlines()
 
-    data = {}
+    data = []
     for i in range(count):
         words = []
 
@@ -57,10 +57,10 @@ def get_question():
                 words.append(word)
         ans = random.randint(0, 3)
 
-        data.update({i : {
+        data.append({
             'options' : words,
             'definition' : get_definition(words[ans]),
             'answer' : ans
-        }})
+        })
 
     return make_json_reponse(data, 200)

@@ -27,11 +27,16 @@ Usage: `.../api/getQuestion[?count=n]`
 Output:
 
 ```json
-{
-    "0" : {
+[
+    {
         "answer": 1,
         "definition": "Definition of word1.",
         "options": ["word0", "word1", "word2", "word3"]
+    },
+    {
+        "answer": 2,
+        "definition": "Definition of word2.",
+        "options": ["word0", "word1", "word2", "word3"]
     }
-}
+]
 ```
