@@ -40,3 +40,7 @@ Output:
     }
 ]
 ```
+
+### `getHint`
+
+Take an optional URL parameter `info` and returns that specific piece of information about that words. Currently, `etymology`, `synonyms`, `examples`, and `part_of_speech` are supported. If the parameter `info` is not passed a random piece of information is returned.
