@@ -1,11 +1,43 @@
 from wiktionaryparser import WiktionaryParser
-from flask import Flask, request, json, Response
+from flask import Flask, request, json, Response, redirect, url_for
 from werkzeug.contrib.cache import SimpleCache
 import random
+from flask_dance.contrib.google import make_google_blueprint, google
+from flask_dance.contrib.facebook import make_facebook_blueprint, facebook
+import pymongo
+import os
 
 parser = WiktionaryParser()
+
 app = Flask(__name__)
-cache = SimpleCache() # we still need a database (MongoDB?)
+app.secret_key = os.environ['SECRET_KEY']
+
+cache = SimpleCache()
+
+# GOOGLE LOGIN
+google_blueprint = make_google_blueprint(
+    client_id=os.environ['GOOGLE_ID'],
+    client_secret=os.environ['GOOGLE_SECRET'],
+    scope=[
+        'https://www.googleapis.com/auth/plus.me',
+        'https://www.googleapis.com/auth/userinfo.email',
+    ],
+    redirect_to='google_login'
+)
+app.register_blueprint(google_blueprint, url_prefix='/api/login')
+
+# FACEBOOK LOGIN
+facebook_blueprint = make_facebook_blueprint(
+    client_id=os.environ['FACEBOOK_SECRET'],
+    client_secret=os.environ['FACEBOOK_SECRET'],
+    scope=['email'],
+    redirect_to='facebook_login'
+)
+app.register_blueprint(facebook_blueprint, url_prefix='/api/login')
+
+mongo = pymongo.MongoClient(os.environ['DB'], maxPoolSize=50, connect=False)
+db = pymongo.database.Database(mongo, 'users')
+users = pymongo.collection.Collection(db, 'users')
 
 website_name = 'https://lingo-backend.herokuapp.com'
 
@@ -66,7 +98,7 @@ def get_definition(query):
     for word in words:
         data[word] = {'definition' : get_info(word).definition}
         if not data[word]['definition']:
-            print(word + " has an error")
+            print(word + ' has an error')
             error = True
     
     return make_json_response(data, 400 if error else 200)
@@ -78,7 +110,7 @@ def get_question():
         count = 1
     count = int(count)
 
-    fin = open("words.txt", "r")
+    fin = open('words.txt', 'r')
     all_words = fin.readlines()
 
     data = []
@@ -107,3 +139,33 @@ def get_hint(query):
     if not info:
         return make_json_response(data.get_random_hint(), 200)
     return make_json_response(data.get_hint(info), 200)
+
+@app.route('/login/google')
+def google_login():
+    if not google.authorized:
+        return redirect(url_for('google.login'))
+    resp = google.get('/oauth2/v2/userinfo')
+    assert resp.ok, resp.text
+
+    username = resp.json()['email']
+    if not users.find_one({ "username": username }):
+        users.insert_one({
+            "username": username,
+            "words": []
+        })
+    return make_json_response({ "username": username }, 200)
+
+@app.route('/login/facebook')
+def facebook_login():
+    if not facebook.authorized:
+        return redirect(url_for('facebook.login'))
+    resp = facebook.get('/oauth2/v2/userinfo')
+    assert resp.ok, resp.text
+
+    username = resp.json()['email']
+    if not users.find_one({ "username": username }):
+        users.insert_one({
+            "username": username,
+            "words": []
+        })
+    return make_json_response({ "username": username }, 200)
