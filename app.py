@@ -22,7 +22,8 @@ google_blueprint = make_google_blueprint(
         'https://www.googleapis.com/auth/plus.me',
         'https://www.googleapis.com/auth/userinfo.email',
     ],
-    redirect_to='google_login'
+    redirect_to='google_login',
+    offline=True
 )
 app.register_blueprint(google_blueprint, url_prefix='/api/login')
 
