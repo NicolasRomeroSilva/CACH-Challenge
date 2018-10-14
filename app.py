@@ -184,7 +184,4 @@ def get_words(user):
 @app.route('/api/<user>/addWord/<word>')
 def add_words(user, word):
     users.update_one({'username': user}, {'$push': {'words': word}})
-    
-    resp = Response(js, status=200, mimetype='application/json')
-    resp.headers['Link'] = website_name
-    return resp
+    return "success"
