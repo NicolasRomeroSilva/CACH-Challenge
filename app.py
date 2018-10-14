@@ -173,3 +173,18 @@ def facebook_login():
             "words": []
         })
     return make_json_response({ "username": username }, 200)
+
+@app.route('/api/<user>/getWords')
+def get_words(user):
+    document = users.find_one({ "username": user})
+    if document:
+        return make_json_response({ "words": document["words"]}, 200)
+    return make_json_response({ "words": []}, 200)
+
+@app.route('/api/<user>/addWord/<word>')
+def add_words(user, word):
+    users.update_one({'username': user}, {'$push': {'words': word}})
+    
+    resp = Response(js, status=200, mimetype='application/json')
+    resp.headers['Link'] = website_name
+    return resp
