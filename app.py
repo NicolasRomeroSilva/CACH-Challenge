@@ -22,8 +22,7 @@ google_blueprint = make_google_blueprint(
         'https://www.googleapis.com/auth/plus.me',
         'https://www.googleapis.com/auth/userinfo.email',
     ],
-    redirect_to='google_login',
-    offline=True
+    redirect_to='google_login'
 )
 app.register_blueprint(google_blueprint, url_prefix='/api/login')
 
@@ -149,7 +148,11 @@ def get_hint(query):
 def google_login():
     if not google.authorized:
         return redirect(url_for('google.login'))
-    resp = google.get('/oauth2/v2/userinfo')
+    repo = None
+    try:
+        resp = google.get('/oauth2/v2/userinfo')
+    except:
+        return redirect(url_for('google.login'))
     assert resp.ok, resp.text
 
     username = resp.json()['email']
