@@ -28,7 +28,7 @@ app.register_blueprint(google_blueprint, url_prefix='/api/login')
 
 # FACEBOOK LOGIN
 facebook_blueprint = make_facebook_blueprint(
-    client_id=os.environ['FACEBOOK_SECRET'],
+    client_id=os.environ['FACEBOOK_ID'],
     client_secret=os.environ['FACEBOOK_SECRET'],
     scope=['email'],
     redirect_to='facebook_login'
@@ -88,6 +88,10 @@ def make_json_response(data, status):
     resp = Response(js, status=status, mimetype='application/json')
     resp.headers['Link'] = website_name
     return resp
+
+@app.route('/terms')
+def terms():
+    return "We won't sell or misuse your data in any way. Just don't dox us please."
 
 @app.route('/api/getDefinition/<query>')
 def get_definition(query):
